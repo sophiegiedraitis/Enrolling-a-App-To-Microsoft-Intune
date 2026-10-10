@@ -1,98 +1,137 @@
-<img width="716" height="490" alt="microsoft_intune" src="https://github.com/user-attachments/assets/7fcbbd21-02b6-466e-a783-e5b218124318" />
-
 <p align="center">
-<img 
+  <img src="https://github.com/user-attachments/assets/7fcbbd21-02b6-466e-a783-e5b218124318" alt="Microsoft Intune project banner" width="716">
 </p>
 
-<h1>Enrolling a App Into Microsoft Intune<h1>
+# Deploying 7-Zip as a Win32 Application with Microsoft Intune
 
- 
- <h3>
-In this lab, we are enrolling Zip-7 into the Microsoft Intune App Portal. We will configure specific detection rules that determine whether the entra enrolled machine already has the app installed upon it. Once we enroll our VM into the Entra portal, we will configure the VM with a security group to then monitor the app to download the 7-Zip.
+## Project Overview
 
- </h3>
+This lab demonstrates how to package, configure, assign, and verify the deployment of **7-Zip** to a Windows 11 virtual machine using **Microsoft Intune**. I used the Microsoft Win32 Content Prep Tool to package the installer, created a Win32 app in Intune, configured installation settings and detection rules, and targeted an enrolled test device through a Microsoft Entra security group.
 
-<h2>
- Skills Demonstrated
-</h2>
- 
-- Microsoft Intune
-- VMWare
+**Result:** I verified that 7-Zip was installed on the test VM and that its application files were present under `C:\Program Files\7-Zip`.
 
+## Skills Demonstrated
 
-<h2>Environments and Technologies Used</h2>
+- Win32 application packaging (`.intunewin`)
+- Microsoft Intune app configuration and assignment
+- Installation requirements and detection rules
+- Microsoft Entra ID security groups
+- Windows device enrollment and app deployment verification
+- VMware-based Windows lab testing
 
-- Microsoft Inune
-- VMWware 
+## Lab Environment
 
+- Microsoft Intune admin center
+- Microsoft Entra ID tenant
+- Windows 11 Pro virtual machine hosted in VMware
+- Microsoft Win32 Content Prep Tool (`IntuneWinAppUtil.exe`)
+- 7-Zip Windows installer
 
-<h2>Operating Systems Used </h2>
+## Prerequisites
 
-- Windows 11 Pro (Virtual Machine)</b> (version 22H2)                                                               
+- A Microsoft Entra tenant with Intune licensing available for the test user/device
+- Appropriate Intune administrative permissions
+- A Windows 11 VM with internet connectivity
+- An Intune-enrolled Windows device (or the ability to enroll one)
+- The 7-Zip installer and Microsoft Win32 Content Prep Tool
 
-<h2>List of Prerequisites</h2>
+> **Note:** Microsoft Entra joining and Intune enrollment are separate states. Joining a device to Entra ID does not, by itself, guarantee that the device is managed by Intune. Automatic MDM enrollment must be configured when using that enrollment path. Verify the device appears in Intune and reports an appropriate management state before expecting an app assignment to install.
 
-- Microsoft Azure tenant                                                                 
+## Deployment Steps
 
+### 1. Prepare the installer and packaging folders
 
-<h2>Installation Steps</h2>
+I created three folders to organize the packaging process:
 
- <p>
-1. First we will need to package up the Zip-7 file into a format that can be uploaded as a app to Microsoft Inune. Under File Explorer we are going to create three folders: Source, Output, and Tools. The Source folder contains the .EXE of the 7-Zip, the Tools folder contains the  Microsoft Content Prep Tools used to package up the 7-Zip download into a format that can be uploaded to Github. The Content Prep Tool can be downloaded from Github here https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool
-Microsoft-Win32-Content-Prep-Tool IntunWinAppUtil.exe
-</p>   
-<img width="1002" height="345" alt="image (2)" src="https://github.com/user-attachments/assets/47de9edb-dca6-48e5-8d0c-e043536e2549" />
-<img width="1262" height="322" alt="tools" src="https://github.com/user-attachments/assets/e23c5891-8d03-461e-aeec-e159879e781f" />
-<img width="1100" height="336" alt="output" src="https://github.com/user-attachments/assets/3693ace7-a459-4963-a1f6-0ba0c0ae2698" />
-<img width="1041" height="491" alt="source" src="https://github.com/user-attachments/assets/f3b79b34-c1f7-45c3-b5c3-cad9d7e55058" />
+- **Source:** Contains the downloaded 7-Zip installer (`.exe`).
+- **Tools:** Contains the Microsoft Win32 Content Prep Tool (`IntuneWinAppUtil.exe`).
+- **Output:** Stores the generated `.intunewin` package.
 
- <p>
-2. Next, we will go into command line to extract the Microsoft Intune Windows App and package up the 7-Zip application to get it into the Intune Windows format that we can upload to Intune
-</p>   
+The official tool is available in Microsoft's [Win32 Content Prep Tool repository](https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool).
 
-<img width="1416" height="567" alt="image (4)" src="https://github.com/user-attachments/assets/40e9204e-be4e-49bf-ac81-c11e40ebe5d8" />
+![Packaging folder structure](https://github.com/user-attachments/assets/47de9edb-dca6-48e5-8d0c-e043536e2549)
+![Tools folder](https://github.com/user-attachments/assets/e23c5891-8d03-461e-aeec-e159879e781f)
+![Output folder](https://github.com/user-attachments/assets/3693ace7-a459-4963-a1f6-0ba0c0ae2698)
+![Source folder](https://github.com/user-attachments/assets/f3b79b34-c1f7-45c3-b5c3-cad9d7e55058)
 
- <p>
-3. Now we can go ahead and upload the 7-Zip package to Intune. In the Intune portal when we go to Apps we are going to choose Windows app (Win32) as our app type and upload the output file we created.
-</p>   
-<img width="1811" height="592" alt="image (5)" src="https://github.com/user-attachments/assets/18bebd3a-f365-4f3a-bf89-7f91bab6785a" />
+### 2. Package 7-Zip as a Win32 application
 
-<p>
-  4. Then we can fill in the property information regarding how the app is going to be regarding the programs install and uninstall command. We are also setting up the requirements that a device will be requirekd to have for the program to be installed onto it. In this case, the only requirement is the the computer needs to be at least on Windows 11.
-</p>
-<img width="1532" height="897" alt="image (7)" src="https://github.com/user-attachments/assets/aec7ec68-f2b8-483b-97f5-1cd26ef8d593" />
+I ran `IntuneWinAppUtil.exe` and provided the source folder, installer filename, and output folder. The tool packages the installer and supporting source content into a **`.intunewin`** file that can be uploaded to Intune. This is not a GitHub package format; it is the format used by Intune for Win32 app deployment.
 
-<p>
-In addition to the requirements we are also setting up detection rules that makes Intune determine whether a device already has 7-Zip installed onto it. Our detection rules state that if a device doesnt't already have 7-Zip installed under C:\Program Files then it will be installed there.
+![Running the Win32 Content Prep Tool](https://github.com/user-attachments/assets/40e9204e-be4e-49bf-ac81-c11e40ebe5d8)
 
-<p>
-Now its to enroll a device into our Intune portal and placed it inside of a security group configured for the app to be installed onto it. We are spinning up a Windows 11 VM in VMWARE and then join it to your Entra tennent under the section Work or School accounts of Windows settings. Once its joined, clicking sync willl sync the device enrollment so you should be able to view the device under the Devices section of Intune.
-</p>
+### 3. Add the Win32 app in Intune
 
-<img width="1042" height="832" alt="image (8)" src="https://github.com/user-attachments/assets/d1bb44c7-dcb0-4d6d-96b7-8263309b7498" />
+In the **Microsoft Intune admin center**, I navigated to **Apps > Windows**, created a new application of type **Windows app (Win32)**, and uploaded the `.intunewin` file from the Output folder.
 
-<p>
-Under the groups section in Microsoft Intune, we are going to go ahead and create the security group that we are going to put the VM into before adding it to the 7-Zip app section.
-</p>
+![Creating a Win32 app in Intune](https://github.com/user-attachments/assets/18bebd3a-f365-4f3a-bf89-7f91bab6785a)
 
-<p>
-Under the Apps section of Intune under device properties we can now add the 7-Zip security group to the Required section. The Required section automaticall installs the app onto the device as long as the detectiion rules indicate that 7-Zip hasn't already been installed onto the device. The Available section for the installation makes the app available for install if we were to configure our Intune tennent to use Company Portal, giving users the ability to install and uninstall apps on their own within the Company Portal application.
-</p>
+### 4. Configure installation settings and requirements
 
-<p>
-Once the device security group is placed within the Required app field then we can go back into our VM and click on the sync button again to speed up the time it takes for the app to be installed onto the device.
-</p>
-</p>
-<img width="1607" height="812" alt="Screenshot 2026-10-10 084425" src="https://github.com/user-attachments/assets/b2c1e89b-c19c-427a-96f7-5a7d5f31dd49" />
+I entered the application's metadata and configured the **install** and **uninstall** commands for the installer I packaged. The exact commands depend on the specific 7-Zip installer version and whether it is an EXE or MSI; they should be tested for silent installation and removal before broad deployment.
 
-<p>
-It can take a bit of time for the app to be downloaded onto the devicde. To monitor the installation you can go to the Device install status section of the App section in Intune.
-</p>
+I also configured operating-system requirements so Intune would evaluate whether a targeted device was eligible for the app. These requirements are distinct from the app's detection rules.
 
-<img width="1861" height="606" alt="Screenshot 2026-10-10 085039" src="https://github.com/user-attachments/assets/8372a3c1-6222-414f-9ab8-79f7cb5465d1" />
+![Application settings and requirements](https://github.com/user-attachments/assets/aec7ec68-f2b8-483b-97f5-1cd26ef8d593)
 
-<p>
-We can now confirm that 7Zip has been successfully installed onto our VM since we can see the 7-Zip application folder under Program Files and of course search for the find the application
-</p>
+### 5. Configure the detection rule
 
-<img width="1022" height="847" alt="Screenshot 2026-10-10 085548" src="https://github.com/user-attachments/assets/500ee5a4-284c-420e-b65e-66796ca25840" />
+I configured a detection rule to check for evidence that 7-Zip was already installed, using its installation location under `C:\Program Files\7-Zip`.
+
+Detection rules tell Intune **whether the app is installed**. They do not specify the installation destination; that is controlled by the installer and its command-line options. If the detection rule succeeds, Intune reports the application as detected rather than repeatedly trying to install it. A file or folder existence check can be used in a lab, although a version-aware file or MSI product-code rule may be more suitable for production deployments.
+
+### 6. Enroll the Windows 11 test VM
+
+I prepared a Windows 11 VM in VMware and connected it to my Microsoft Entra tenant through Windows **Settings > Accounts > Access work or school** using the appropriate join/enrollment workflow.
+
+I then verified the device's Intune management status. The **Sync** option can request a new management check-in, but a successful Entra sign-in or join alone is not proof of Intune enrollment.
+
+![Windows work or school account settings](https://github.com/user-attachments/assets/d1bb44c7-dcb0-4d6d-96b7-8263309b7498)
+
+### 7. Create a security group and assign the app
+
+I created a Microsoft Entra **security group** and added the test VM as a device member. In the 7-Zip application's **Assignments** section, I targeted that group with a **Required** assignment.
+
+- **Required:** Intune attempts to install the app automatically on eligible targeted devices.
+- **Available for enrolled devices:** Makes the app available for user-initiated installation through Company Portal when assigned appropriately (typically to a user group).
+
+An **Available** assignment does not automatically install the application, and uninstall behavior depends on additional configuration and permissions.
+
+After assigning the group, I initiated another device sync to request a check-in.
+
+![App assignment to a security group](https://github.com/user-attachments/assets/b2c1e89b-c19c-427a-96f7-5a7d5f31dd49)
+
+### 8. Monitor installation status
+
+In Intune, I opened the 7-Zip app and reviewed its **Device install status** to monitor the deployment. App delivery and status reporting can take time because devices must check in, evaluate policy, and process the installer and detection rule.
+
+![Intune device installation status](https://github.com/user-attachments/assets/8372a3c1-6222-414f-9ab8-79f7cb5465d1)
+
+### 9. Verify installation on the VM
+
+Finally, I checked the Windows 11 VM and confirmed that the 7-Zip application files were present under `C:\Program Files\7-Zip`. I also checked that the application could be found from Windows. This provided device-side confirmation of the deployment.
+
+![7-Zip installed on the Windows VM](https://github.com/user-attachments/assets/500ee5a4-284c-420e-b65e-66796ca25840)
+
+## Troubleshooting and Lessons Learned
+
+During the lab, I encountered an installer/package error while configuring the deployment. This reinforced the importance of matching the installation command to the actual installer type (**EXE versus MSI**) and testing silent installation behavior. It also highlighted why detection rules, device enrollment status, and app assignment targeting should be checked separately when troubleshooting deployment failures.
+
+Key takeaways:
+
+1. **Packaging:** Intune Win32 apps use `.intunewin` packages created with the Microsoft Win32 Content Prep Tool.
+2. **Installer commands:** Silent installation and uninstall switches vary by installer; they are not interchangeable across EXE and MSI packages.
+3. **Detection:** A detection rule should reliably identify the installed app, ideally including version checks when relevant.
+4. **Enrollment:** Microsoft Entra join and Intune MDM enrollment are related but distinct.
+5. **Assignments:** A Required deployment installs automatically on eligible targets; an Available assignment enables user-initiated installation in Company Portal.
+6. **Verification:** Both Intune reporting and on-device validation are useful for confirming a successful deployment.
+
+## Outcome
+
+**7-Zip was successfully deployed to the Windows 11 lab VM.** This project gave me hands-on practice with the core workflow for deploying Win32 applications using Microsoft Intune, including packaging, application configuration, security-group targeting, detection, and deployment verification.
+
+## References
+
+- [Microsoft Win32 Content Prep Tool](https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool)
+- [Microsoft Learn — Win32 app management in Intune](https://learn.microsoft.com/en-us/intune/intune-service/apps/apps-win32-app-management)
+
