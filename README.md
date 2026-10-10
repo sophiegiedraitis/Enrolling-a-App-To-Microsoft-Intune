@@ -85,4 +85,14 @@ Once the device security group is placed within the Required app field then we c
 </p>
 <img width="1607" height="812" alt="Screenshot 2026-10-10 084425" src="https://github.com/user-attachments/assets/b2c1e89b-c19c-427a-96f7-5a7d5f31dd49" />
 
+<p>
+It can take a bit of time for the app to be downloaded onto the devicde. To monitor the installation you can go to the Device install status section of the App section in Intune.
+</p>
 
+<img width="1861" height="606" alt="Screenshot 2026-10-10 085039" src="https://github.com/user-attachments/assets/8372a3c1-6222-414f-9ab8-79f7cb5465d1" />
+
+<p>
+We can now confirm that 7Zip has been successfully installed onto our VM since we can see the 7-Zip application folder under Program Files and of course search for the find the application
+</p>
+
+<img width="1022" height="847" alt="Screenshot 2026-10-10 085548" src="https://github.com/user-attachments/assets/500ee5a4-284c-420e-b65e-66796ca25840" />
