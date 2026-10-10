@@ -126,6 +126,42 @@ Key takeaways:
 5. **Assignments:** A Required deployment installs automatically on eligible targets; an Available assignment enables user-initiated installation in Company Portal.
 6. **Verification:** Both Intune reporting and on-device validation are useful for confirming a successful deployment.
 
+## Win32 Application Installation and Uninstallation Commands
+
+When deploying Win32 applications through Microsoft Intune, the installation and uninstallation commands depend on the installer type (.MSI or .EXE).
+
+| Installer Type | Install Command | Uninstall Command |
+|---|---|---|
+| **MSI** | `msiexec /i "application.msi" /qn /norestart` | `msiexec /x "{PRODUCT-CODE-GUID}" /qn /norestart` |
+| **EXE (NSIS)** | `"application.exe" /S` | `"uninstall.exe" /S` |
+| **EXE (Inno Setup)** | `"application.exe" /VERYSILENT /NORESTART` | `"unins000.exe" /VERYSILENT /NORESTART` |
+| **EXE (InstallShield)** | Depends on installer configuration | Depends on installer configuration |
+
+### Command Parameters Explained
+
+| Parameter | Description |
+|---|---|
+| `msiexec` | Windows Installer command-line utility |
+| `/i` | Installs an MSI package |
+| `/x` | Uninstalls an MSI package |
+| `/qn` | Runs without displaying a user interface |
+| `/norestart` | Prevents an automatic restart |
+| `/S` | Silent installation/uninstallation for NSIS installers |
+| `/VERYSILENT` | Silent mode for Inno Setup installers |
+| `{PRODUCT-CODE-GUID}` | Unique MSI product identifier used for uninstallation |
+
+**Important Notes:**
+
+- MSI installation commands generally use `msiexec`, whereas EXE commands depend on the installer technology.
+- Not every EXE supports `/S`, `/silent`, or `/quiet`. Always consult the application's documentation.
+- The executable name and uninstall path must match the actual application package and installation location.
+- Quotation marks are recommended around executable paths containing spaces.
+- Test installation, detection, and uninstallation commands before deploying applications to production devices.
+
+
+
+
+
 ## Outcome
 
 **7-Zip was successfully deployed to the Windows 11 lab VM.** This project gave me hands-on practice with the core workflow for deploying Win32 applications using Microsoft Intune, including packaging, application configuration, security-group targeting, detection, and deployment verification.
